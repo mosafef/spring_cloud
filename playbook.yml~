@@ -1,0 +1,83 @@
+---
+- hosts: all
+  sudo: yes
+
+  vars:
+     - jdk_version:      1.8.0_65
+     - jdk_tarball_file: jdk-8u65-linux-x64
+     - jdk_tarball_url:  http://download.oracle.com/otn-pub/java/jdk/8u65-b17/jdk-8u65-linux-x64
+    
+     - gradle_url: https://services.gradle.org/distributions
+     - gradle_filename: gradle-2.9-all.zip
+  
+     - consul_config:
+          filename: consul_0.5.2_linux_amd64.zip
+          url: https://releases.hashicorp.com/consul/0.5.2/
+
+  tasks:
+
+# Base config
+   - name: update apt data
+     apt: update_cache=yes
+
+   - name: Install list of packages
+     apt: name={{item}} state=present
+     with_items:
+     - unzip
+     - curl
+     - emacs24
+
+# Consul config
+   
+#   - name: rerieve and install Consul
+#     get_url: url={{ consul_config.url }}{{ consul_config.filename }} dest=.
+     
+#   - name: unzip
+#     command: unzip /home/vagrant/{{ consul_config.filename }}
+    
+#   - name: copy to path
+#     command: mv /home/vagrant/consul /usr/local/bin
+     
+
+   - name: get JDK tarball (as tar.gz file)
+     command: curl -L  -H 'Cookie:oraclelicense=accept-securebackup-cookie'  -o {{ jdk_tarball_file }}.tar.gz  {{ jdk_tarball_url }}.tar.gz
+
+   - name: mkdir for Java
+     file: path="/usr/java/jdk1.8" state="directory" owner="root" group="root" mode="u=rwx,go=rx"
+
+   - name: install JDK
+     unarchive: src="/home/vagrant/{{ jdk_tarball_file }}.tar.gz" dest="/usr/java" owner="root" group="root" mode="go-w" copy="no"
+   
+   - name: link /usr/java/default
+     file: dest=/usr/java/default src="/usr/java/jdk1.8.0_65" state=link
+
+   - name: alternatives link for "java"
+     alternatives: name=java link=/usr/bin/java  path=/usr/java/default/bin/java
+
+   - name: alternatives link for "javac"
+     alternatives: name=javac link=/usr/bin/javac  path=/usr/java/default/bin/javac
+
+   - name: alternatives link for "jar"
+     alternatives: name=jar link=/usr/bin/jar  path=/usr/java/default/bin/jar
+
+   - name: alternatives link for "java_sdk"
+     alternatives: name=java_sdk link=/usr/lib/jvm/java  path=/usr/java/default
+     ignore_errors: true
+    
+
+#    gradle
+   - name: make Gradle home
+     file: path="/usr/gradle" state="directory" owner="root" group="root" mode="u=rwx,go=rx"
+
+   - name: rerieve Gradle
+     get_url: url={{ gradle_url }}/{{ gradle_filename }} dest=.
+
+   - name: install Gradle
+     unarchive: src="/home/vagrant/{{ gradle_filename }}" dest="/usr/gradle" owner="root" group="root" mode="go-w" copy="no"
+ 
+   - name: alternatives link for "gradle"
+     alternatives: name=gradle link=/usr/bin/gradle  path=/usr/gradle/gradle-2.9
+      
+
+#   - name: configure consul services
+#     copy: src=config/service/ dest=/etc/consul.d

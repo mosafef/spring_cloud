@@ -1,0 +1,2 @@
+export GRADLE_HOME=/home/vagrant/bin/gradle-2.8
+export PATH=$PATH:$GRADLE_HOME/bin
