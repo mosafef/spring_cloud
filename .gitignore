@@ -9,3 +9,5 @@ tramp
 .\#*
 /.vagrant
 /.git
+/.gradle
+build/

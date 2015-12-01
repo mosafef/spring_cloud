@@ -76,11 +76,7 @@
      unarchive: src="/home/vagrant/{{ gradle_filename }}" dest="/usr/gradle" owner="root" group="root" mode="go-w" copy="no"
 
    - name: link /usr/bin/gradle
-     file: dest="/usr/bin/gradle" src="/usr/gradle/gradle-2.9/bin/gradle"  state=link owner="root" group="root" mode="go-w"
-
-   - name: alternatives link for "gradle"
-     alternatives: name=gradle link=/usr/bin/gradle  path=/usr/gradle/gradle-2.9
-      
+     file: dest="/usr/bin/gradle" src="/usr/gradle/gradle-2.9/bin/gradle"  state=link owner="root" group="root" mode="go-w"      
 
 #   - name: configure consul services
 #     copy: src=config/service/ dest=/etc/consul.d
